@@ -4,7 +4,7 @@ var firebase = require("firebase");
 var FCM = require('fcm-node');
 var serverKey = 'AAAAuEcBSz0:APA91bETO6VLcRD-fRNvbU3ULlozZi_UTYtxn8ja3-TVnxEYUiut7YiLbzhdXSKOGhIjJuxjNvEqjz19yCuJykPMwv12JrGg-eqPxWxPbTgO-lgrImp24WXuK-K1u-x7Dbp9pVn2jHlw';
 var fcm = new FCM(serverKey);
-
+const gcloud = require('google-cloud')
 
 var config = {
     appName: "vaportalk",
@@ -12,19 +12,21 @@ var config = {
     authDomain: "vaportalk-6725e.firebaseapp.com",
     databaseURL: "https://vaportalk-6725e.firebaseio.com",
     projectId: "vaportalk-6725e",
-    storageBucket: "vaportalk-6725e.appspot.com",
+    storageBucket: "gs://vaportalk-6725e.appspot.com",
     messagingSenderId: "791465249597"
 };
+
+const storage = gcloud.storage({
+    projectId: "vaportalk-6725e",
+    keyFilename: './vaportalk-6725e-firebase-adminsdk-y7bx5-01cca11d56.json'
+});
 
 firebase.initializeApp(config);
 
 var db = firebase.database();
-//var storage = firebase.storage();
+const bucket = storage.bucket("vaportalk-6725e.appspot.com");
 
 var ref = db.ref();
-//var storageRef = storage.ref();
-
-//const bucket = gcs.bucket("vaportalk-6725e.appspot.com");
 
 var usersRef = ref.child("/users");
 var lastMessagesRef = ref.child("/lastMessages");
@@ -54,9 +56,6 @@ Number.prototype.toRad = function() {
 
 setInterval(checkInterval,1000*60*5);
 
-
-//var filePath = "vapor/04HL2HlI4VXmXgPJnes1fyDyT0x1/04HL2HlI4VXmXgPJnes1fyDyT0x1/516819383230.jpg";
-
 function changeDate(dateStr){
 
     var year = dateStr.substring(0,4);
@@ -71,8 +70,6 @@ function changeDate(dateStr){
     return date;
 }
 
-checkInterval();
-
 function checkInterval() {
     messagesRef.once('value').then(function (messagesSnap) {
         messagesSnap.forEach(function (toSnap) {
@@ -86,8 +83,13 @@ function checkInterval() {
                         var from = messageSnap.val()["from"];
                         var to = toSnap.key;
 
-                        ref.child("/"+messagesSnap.key).child("/"+toSnap).child("/"+fromSnap).child("/"+messageSnap).remove();
-                        //storageRef.child('/vapor').child("/"+to).child("/"+from).child("/"+contents+".jpeg").remove();
+                        ref.child("/"+messagesSnap.key).child("/"+to).child("/"+from).child("/"+messageSnap.key).remove();
+                        bucket.file("vapor/" + to + "/" + from + "/" + contents).delete().then(function () {
+                            console.log("delete" + contents);
+                        }).catch(function (err) {
+                            console.log(err);
+                        });
+
                     }
                 });
             });
