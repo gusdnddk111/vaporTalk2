@@ -4,7 +4,7 @@ var firebase = require("firebase");
 var FCM = require('fcm-node');
 var serverKey = 'AAAAuEcBSz0:APA91bETO6VLcRD-fRNvbU3ULlozZi_UTYtxn8ja3-TVnxEYUiut7YiLbzhdXSKOGhIjJuxjNvEqjz19yCuJykPMwv12JrGg-eqPxWxPbTgO-lgrImp24WXuK-K1u-x7Dbp9pVn2jHlw';
 var fcm = new FCM(serverKey);
-const gcloud = require('google-cloud')
+const gcloud = require('google-cloud');
 
 var config = {
     appName: "vaportalk",
